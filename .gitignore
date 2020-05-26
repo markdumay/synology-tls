@@ -9,3 +9,6 @@
 
 # Local filesystem files
 .DS_Store
+
+# Docker-compose file for testing
+debug.yml
