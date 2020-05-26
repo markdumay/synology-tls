@@ -22,10 +22,7 @@ secrets:
 
 services:
     acme:
-        # image: "neilpang/acme.sh:latest"
-        build:
-            dockerfile: Dockerfile
-            context: .
+        image: "markdumay/synology-tls:2.8"
         networks:
             dns:
         volumes:
