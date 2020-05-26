@@ -22,11 +22,11 @@ secrets:
 
 services:
     acme:
-        image: "markdumay/synology-tls:2.8"
+        image: "markdumay/synology-tls:2.8.6"
         networks:
             dns:
         volumes:
-            make ACME data persistent
+            # make ACME data persistent
             - ./data/acme:/acme.sh
         restart: "no"
         secrets:
