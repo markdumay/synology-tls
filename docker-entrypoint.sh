@@ -23,7 +23,7 @@ export FORCE_RENEW=$( echo "$FORCE_RENEW" | tr -s  '[:upper:]'  '[:lower:]' )
 if [[ $STAGE = 'production' ]] ; then export TEST_FLAG=''; fi; 
 if [[ $FORCE_RENEW = 'true' ]] ; then export RENEW_FLAG='--force'; fi; 
 if [ ! -z "${NOTIFY_HOOK}" ] ; then 
-    export NOTIFY_FLAG="--set-notify --notify-level $NOTIFY_LEVEL --notify-hook $NOTIFY_HOOK"; 
+    export NOTIFY_FLAG="--notify-level $NOTIFY_LEVEL --notify-hook $NOTIFY_HOOK"; 
 fi; 
 if [ ! -z "${DEPLOY_HOOK}" ] ; then 
     export DEPLOY_CMD="acme.sh -d '${DOMAIN}' -d '*.${DOMAIN}' --deploy --deploy-hook $DEPLOY_HOOK"; 
