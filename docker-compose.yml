@@ -1,0 +1,64 @@
+version: "3.7"
+
+networks:
+    dns:
+
+secrets:
+    CF_Email:
+        file: secrets/CF_Email.txt
+        # external: true
+    CF_Token:
+        file: secrets/CF_Token.txt
+        # external: true
+    SYNO_Username:
+        file: secrets/SYNO_Username.txt
+        # external: true
+    SYNO_Password:
+        file: secrets/SYNO_Password.txt
+        # external: true
+    SLACK_WEBHOOK_URL:
+        file: secrets/SLACK_WEBHOOK_URL.txt
+        # external: true
+
+services:
+    acme:
+        # image: "neilpang/acme.sh:latest"
+        build:
+            dockerfile: Dockerfile
+            context: .
+        networks:
+            dns:
+        volumes:
+            make ACME data persistent
+            - ./data/acme:/acme.sh
+        restart: "no"
+        secrets:
+            - CF_Email
+            - CF_Token
+            - SYNO_Username
+            - SYNO_Password
+            - SLACK_WEBHOOK_URL
+        environment:
+            # Set to core domain in .env (e.g. example.com), wildcard is added automatically
+            - DOMAIN=${DOMAIN}
+            # Set to 'production' in .env to request real certificate, defaults to staging (appends '--test' parameter)
+            - STAGE=${STAGE}
+            # Set to 'true' in .env to force renew a cert immediately (appends '--force' parameter)
+            - FORCE_RENEW=${FORCE_RENEW}
+            # Deployment settings (using Synology hook)
+            - DEPLOY_HOOK=${DEPLOY_HOOK}
+            - SYNO_Certificate=${SYNO_Certificate}
+            - SYNO_Create=1
+            - SYNO_Hostname=${SYNO_Hostname}
+            - SYNO_Port=${SYNO_Port}
+            # Notification settings (using Slack hook)
+            - NOTIFY_HOOK=${NOTIFY_HOOK}
+            - NOTIFY_LEVEL=${NOTIFY_LEVEL}
+            - SLACK_CHANNEL=#certificates
+            - SLACK_USERNAME=certbot
+        # export Dockers secrets as environment variables and issue certificate using DNS automation
+        # flags are populated by the entrypoint script
+        command: > 
+            sh -c 
+            "acme.sh --issue -d '${DOMAIN}' -d '*.${DOMAIN}' --dns dns_cf $$TEST_FLAG $$RENEW_FLAG $$NOTIFY_FLAG
+            && $$DEPLOY_CMD"

@@ -1,0 +1,11 @@
+# dotenv environment variables file
+.env
+
+# Mount for ACME script
+/data
+
+# Temporary secrets for testing
+/secrets
+
+# Local filesystem files
+.DS_Store
