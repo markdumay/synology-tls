@@ -26,7 +26,7 @@ if [ ! -z "${NOTIFY_HOOK}" ] ; then
     export NOTIFY_FLAG="--notify-level $NOTIFY_LEVEL --notify-hook $NOTIFY_HOOK"; 
 fi; 
 if [ ! -z "${DEPLOY_HOOK}" ] ; then 
-    export DEPLOY_CMD="acme.sh -d '${DOMAIN}' -d '*.${DOMAIN}' --deploy --deploy-hook $DEPLOY_HOOK"; 
+    export DEPLOY_CMD="acme.sh --deploy -d '${DOMAIN}' --deploy-hook $DEPLOY_HOOK"; 
 fi; 
 
 # Call parent's entry script in current script context
