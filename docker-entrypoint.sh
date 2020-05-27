@@ -4,7 +4,7 @@
 set -e 
 
 # Export Docker secrets as environment variables without displaying any errors / messages
-export $(grep -vH --null '^#' /run/secrets/* | tr '\0' '=' | sed 's/^\/run\/secrets\///g')
+export $(grep -vH --null '^#' /run/secrets/* | tr '\0' '=' | sed 's/^\/run\/secrets\///g') > /dev/null 2>&1
 
 # Set default values for flags and environment variables
 export TEST_FLAG='--test'
