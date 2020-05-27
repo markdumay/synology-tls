@@ -1,18 +1,18 @@
 #!/bin/sh
 
-# Read secret string
+# Read secret string, original code by Susam Pal at https://stackoverflow.com/a/28393320
 read_secret() {
-    # Disable echo.
+    # Disable echo
     stty -echo
 
     # Set up trap to ensure echo is enabled before exiting if the script
-    # is terminated while echo is disabled.
+    # is terminated while echo is disabled
     trap 'stty echo' EXIT
 
-    # Read secret.
+    # Read secret
     read "$@"
 
-    # Enable echo.
+    # Enable echo
     stty echo
     trap - EXIT
 
