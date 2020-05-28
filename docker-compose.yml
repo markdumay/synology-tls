@@ -26,8 +26,10 @@ services:
         networks:
             dns:
         volumes:
-            # make ACME data persistent
+            # make ACME data persistent (optional)
             - ./data/acme:/acme.sh
+            # make log data persistent to simplify monitoring (optional)
+            - ./data/log:/var/log
         restart: "unless-stopped"
         secrets:
             - CF_Email
