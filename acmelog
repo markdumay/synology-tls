@@ -1,0 +1,6 @@
+/var/log/acme.log
+{
+daily
+maxsize 5M
+rotate 4
+}

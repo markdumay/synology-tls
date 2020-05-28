@@ -1,6 +1,6 @@
 FROM alpine:3.11
 
-# Add GNU grep on top of neilpang/acme.sh:latest
+# Add GNU grep and logrotate on top of neilpang/acme.sh:latest
 RUN apk update -f \
   && apk --no-cache add -f \
   openssl \
@@ -13,6 +13,7 @@ RUN apk update -f \
   oath-toolkit-oathtool \
   tar \
   grep \
+  logrotate \
   && rm -rf /var/cache/apk/*
 
 ENV LE_CONFIG_HOME /acme.sh
@@ -72,6 +73,10 @@ VOLUME /acme.sh
 # Add shell script to stage Docker secrets
 COPY stage-env.sh /usr/local/bin/stage-env.sh
 RUN chmod +x /usr/local/bin/stage-env.sh
+
+# Add logrotate configuration
+COPY acmelog /etc/logrotate.d/acmelog
+RUN chmod 644 /etc/logrotate.d/acmelog && chown root:root /etc/logrotate.d/acmelog
 
 # Override entrypoint with custom script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
