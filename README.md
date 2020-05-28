@@ -121,7 +121,7 @@ docker-compose up
 
 After pulling the image from the Docker Hub, you should see several messages. Below excerpt shows the key messages per section.
 
-#### Booting of the service
+#### Booting of the Service
 During boot, Synology TLS replaces the cronjob of acme.sh with a custom job following the schedule in `.env`. The cronjob writes a log file to `'/var/log/acme.log'`.
 ```
 acme_1 | Removing cron job
@@ -139,7 +139,7 @@ acme_1 | Installed to /root/.acme.sh/acme.sh
 acme_1 | Upgrade success!
 ```
 
-#### Conducting DNS-01 check
+#### Conducting DNS-01 Check
 Synology TLS uses a DNS-01 Challenge so Let's Encrypt can validate ownership of your domain. This setup prevents having to expose your NAS to the public internet. The DNS configuration is automated using CloudFlare. By default, Synology TLS requests the main certificate and a wildcard certificate for your domain.
 ```
 acme_1 | Create account key ok.
@@ -151,7 +151,7 @@ acme_1 | Verifying: *.example.com
 acme_1 | Success
 ```
 
-#### Downloading Let's Encrypt certificates
+#### Downloading Let's Encrypt Certificates
 With the DNS-01 challenge passed, Synology TLS then downloads the certificates. The certificates and keys are stored in the mounted folder `data/acme/example.com`.
 ```
 acme_1 | Download cert, Le_LinkCert: https://acme-staging-v02.api.letsencrypt.org/acme/cert/xxx
@@ -159,7 +159,7 @@ acme_1 | Cert success.
 acme_1 | Your cert is in  /acme.sh/example.com/example.com.cer 
 ```
 
-#### Deploying the certificates to your NAS
+#### Deploying the Certificates to your NAS
 As a final step, the certificates are automatically deployed to your Synology NAS. 
 ```
 acme_1 | Logging into localhost:5000
