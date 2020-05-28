@@ -228,7 +228,7 @@ Run the following command to inspect the status of the Docker Stack.
 docker stack services synology-tls
 ```
 
-You should see the value `1/1` for `REPLICAS` for the Synology T:S service if the stack was initialized correctly. It might take a while before the services are up and running, so simply repeat the command after a few minutes if needed.
+You should see the value `1/1` for `REPLICAS` for the Synology TLS service if the stack was initialized correctly. It might take a while before the services are up and running, so simply repeat the command after a few minutes if needed.
 
 ```
 ID  NAME                MODE        REPLICAS    IMAGE                               PORTS
