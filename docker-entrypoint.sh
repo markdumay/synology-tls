@@ -42,8 +42,6 @@ $DEPLOY_CMD
 
 # Replace default cronjob when the schedule is specified
 if [ ! -z "${CRON_SCHEDULE}" ] ; then 
-    echo "Replacing default cronjob with custom job at '$CRON_SCHEDULE'"
-
     # Generate a cron job script (running acme.sh upgrade, issue.sh, and deploy.sh)
     printf "%b" '#!'"/usr/bin/env sh\n \
     acme.sh --upgrade && issue.sh && deploy.sh
@@ -53,7 +51,9 @@ if [ ! -z "${CRON_SCHEDULE}" ] ; then
     acme.sh --uninstall-cronjob
 
     # Install custom cronjob if not added already
-    ! (crontab -l | grep -q "cron.sh") && (crontab -l; echo "$CRON_SCHEDULE cron.sh >> /var/log/cron.log 2>&1") | crontab -
+    echo "[$(date -u)] Adding custom cron job at '$CRON_SCHEDULE'"
+    echo "[$(date -u)] View the cron log in '/var/log/acme.log'"
+    ! (crontab -l | grep -q "cron.sh") && (crontab -l; echo "$CRON_SCHEDULE cron.sh >> /var/log/acme.log 2>&1") | crontab -
 fi;
 
 # Call parent's entry script in current script context
