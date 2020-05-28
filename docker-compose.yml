@@ -28,7 +28,7 @@ services:
         volumes:
             # make ACME data persistent
             - ./data/acme:/acme.sh
-        restart: "no"
+        restart: "unless-stopped"
         secrets:
             - CF_Email
             - CF_Token
@@ -51,11 +51,9 @@ services:
             # Notification settings (using Slack hook)
             - NOTIFY_HOOK=${NOTIFY_HOOK}
             - NOTIFY_LEVEL=${NOTIFY_LEVEL}
-            - SLACK_CHANNEL=#certificates
-            - SLACK_USERNAME=certbot
-        # export Dockers secrets as environment variables and issue certificate using DNS automation
-        # flags are populated by the entrypoint script
-        command: > 
-            sh -c 
-            "acme.sh --issue -d '${DOMAIN}' -d '*.${DOMAIN}' --dns dns_cf $$TEST_FLAG $$RENEW_FLAG $$NOTIFY_FLAG
-            && $$DEPLOY_CMD"
+            - SLACK_CHANNEL=${SLACK_CHANNEL}
+            - SLACK_USERNAME=${SLACK_USERNAME}
+            # Cron schedule
+            - CRON_SCHEDULE=${CRON_SCHEDULE}
+        # Run acme.sh in Daemon mode
+        command: daemon

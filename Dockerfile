@@ -68,6 +68,11 @@ fi" >/entry.sh && chmod +x /entry.sh
 
 VOLUME /acme.sh
 
+
+# Add shell script to stage Docker secrets
+COPY stage-env.sh /usr/local/bin/stage-env.sh
+RUN chmod +x /usr/local/bin/stage-env.sh
+
 # Override entrypoint with custom script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
