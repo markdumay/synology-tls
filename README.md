@@ -55,8 +55,7 @@ The project uses the following core software components:
 ## Prerequisites
 Synology TLS can run on any Docker-capable host. The setup has been tested locally on macOS Catalina and a Synology NAS running DSM 6.2. Other prerequisites are:
 
-* **A registered domain name is required** - 
-A domain name is required to configure SSL certificates that will enable secure traffic to your Synology NAS. You should have the ability to configure DNS entries for your domain too.
+* **A registered domain name is required** - A domain name is required to configure SSL certificates that will enable secure traffic to your Synology NAS. You should have the ability to configure DNS entries for your domain too.
 
 * **Docker Compose and Docker Swarm are required** - Synology TLS is to be deployed as Docker container in swarm mode to enable Docker *secrets*. This [reference guide][swarm_init] explains how to initialize Docker Swarm on your host.
 
@@ -95,13 +94,21 @@ mv sample.env .env
 ```
 
 The `.env` file specifies eight variables. Adjust them as needed:
+
 * **CRON_SCHEDULE** - Defines the schedule for automated renewal and deployment of the certificates. The job also updates the acme.sh script. [Crontab guru][crontab_guru] is an excellent help for defining cron schedules. The default value `0 2 * * *` validates the certificates at 2 am daily.
+
 * **DOMAIN** - Replace this with your domain name (e.g. `example.com`).
+
 * **STAGE** - Options are `staging` or `production`. Use `staging` for testing purposes to avoid hitting rate limits from Let's Encrypt.
+
 * **FORCE_RENEW** - If `true`, forces renewal of the certificates regardless of whether they are still valid. The default value is `false`.
+
 * **DEPLOY_HOOK** - The `acme.sh` script supports up to 20 different deployment hooks. Synology TLS defaults to `synology_dsm`. Refer to the [wiki][acmesh_deploy] to see the notes on supporting two-factor authentication for your Synology account.
+
 * **SYNO_Certificate** - Defines the description to be shown in DSM's `Control Panel ➡ Security ➡ Certificate`.
+
 * **SYNO_Hostname** - Refers to the local address of your Synology NAS. Replace this with the local IP address of your NAS. You can find the address in DSM at `Control Panel ➡ Info Center ➡ Network` under `LAN 1`.
+
 * **SYNO_Port** - Captures the HTTP port DSM is listening on, the default value is `5000`. You can find the current value in DSM under `Control Panel ➡ Network ➡ DSM Settings`.
 
 
@@ -114,7 +121,7 @@ docker-compose up
 
 After pulling the image from the Docker Hub, you should see several messages. Below excerpt shows the key messages per section.
 
-**Booting of the service**
+#### Booting of the service
 During boot, Synology TLS replaces the cronjob of acme.sh with a custom job following the schedule in `.env`. The cronjob writes a log file to `'/var/log/acme.log'`.
 ```
 acme_1 | Removing cron job
@@ -124,7 +131,7 @@ acme_1 | Adding custom cron job at '* 2 * * *'
 acme_1 | View the cron log in '/var/log/acme.log'
 ```
 
-**Updating of acme.sh**
+#### Updating of acme.sh
 The acme.sh script is updated regularly. The latest version is downloaded during booting and will be refreshed by cron too.
 ```
 acme_1 | Installing from online archive.
@@ -132,7 +139,7 @@ acme_1 | Installed to /root/.acme.sh/acme.sh
 acme_1 | Upgrade success!
 ```
 
-**Conducting DNS-01 check**
+#### Conducting DNS-01 check
 Synology TLS uses a DNS-01 Challenge so Let's Encrypt can validate ownership of your domain. This setup prevents having to expose your NAS to the public internet. The DNS configuration is automated using CloudFlare. By default, Synology TLS requests the main certificate and a wildcard certificate for your domain.
 ```
 acme_1 | Create account key ok.
@@ -144,7 +151,7 @@ acme_1 | Verifying: *.example.com
 acme_1 | Success
 ```
 
-**Downloading Let's Encrypt certificates**
+#### Downloading Let's Encrypt certificates
 With the DNS-01 challenge passed, Synology TLS then downloads the certificates. The certificates and keys are stored in the mounted folder `data/acme/example.com`.
 ```
 acme_1 | Download cert, Le_LinkCert: https://acme-staging-v02.api.letsencrypt.org/acme/cert/xxx
@@ -152,7 +159,7 @@ acme_1 | Cert success.
 acme_1 | Your cert is in  /acme.sh/example.com/example.com.cer 
 ```
 
-**Deploying the certificates to your NAS**
+#### Deploying the certificates to your NAS
 As a final step, the certificates are automatically deployed to your Synology NAS. 
 ```
 acme_1 | Logging into localhost:5000
