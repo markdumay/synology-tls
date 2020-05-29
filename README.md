@@ -81,7 +81,7 @@ git clone https://github.com/markdumay/synology-tls.git
 cd synology-tls
 ```
 
-### Step 2 - Create Docker Secret Files
+### Step 2 - Create Docker Secrets
 As Docker-compose does not support external Swarm secrets, we will create local secret files for testing purposes. The credentials are stored as plain text, so this is not recommended for production. Replace the values with your CloudFlare (`CF_` prefix) and Synology (`SYNO_`) credentials accordingly (see <a href="#prerequisites">prerequisites</a>).
 
 ```console
@@ -115,7 +115,7 @@ The `.env` file specifies eight variables. Adjust them as needed:
 
 
 
-### Step 4 - Run with Docker Compose
+### Step 4 - Run Docker Service
 Test the Docker service with `docker-compose up`.
 
 ```console
@@ -185,7 +185,7 @@ The steps for deploying in production are slightly different than for local test
 *Unchanged*
 
 
-### Step 2a - Create Docker Swarm Secrets
+### Step 2 - Create Docker Secrets
 Instead of file-based secrets, you will now create secure secrets. Docker secrets can be easily created using pipes. Do not forget to include the final `-`, as this instructs Docker to use piped input. Update the credentials as needed.
 
 ```console
@@ -204,7 +204,6 @@ If you do not feel comfortable copying secrets from your command line, you can u
 ./create_secret.sh SYNO_Password
 ```
 
-### Step 2b - Update the Docker Compose File
 The `docker-compose.yml` in the repository defaults to set up for local testing. Update the `secrets` section to use Docker secrets instead of local files.
 
 ```Dockerfile
@@ -223,8 +222,8 @@ secrets:
 *Unchanged, however, set STAGE to production once everything is working properly*
 
 
-### Step 4 - Run with Docker Stack
-Unlike Docker Compose, Docker Stack does not automatically create local folders. Create an empty folder for the `acme.sh` data and log data. Next, deploy the Docker Stack using `docker-compose` as input. This ensures the environment variables are parsed correctly.
+### Step 4 - Run Docker Service
+The Docker service will deployed to a Docker Stack in production. Unlike Docker Compose, Docker Stack does not automatically create local folders. Create an empty folder for the `acme.sh` data and log data. Next, deploy the Docker Stack using `docker-compose` as input. This ensures the environment variables are parsed correctly.
 
 ```console
 mkdir -p data/acme
