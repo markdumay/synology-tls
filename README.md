@@ -241,10 +241,10 @@ You should see the value `1/1` for `REPLICAS` for the Synology TLS service if th
 
 ```
 ID  NAME                MODE        REPLICAS    IMAGE                               PORTS
-*** synology-tls        replicated  1/1         markdumay/synology-tls:2.8.6
+*** synology-tls_acme   replicated  1/1         markdumay/synology-tls:2.8.6
 ```
 
-You can view the service log with `docker service logs <service-name>` once the service is up and running. Refer to the paragraph <a href="#step-4---run-with-docker-compose">Step 4 - Run with Docker Compose</a> for validation of the logs.
+You can view the service log with `docker service logs synology-tls_acme` once the service is up and running. Refer to the paragraph <a href="#step-4---run-with-docker-compose">Step 4 - Run with Docker Compose</a> for validation of the logs.
 
 Debugging swarm services can be quite challenging. If for some reason your service does not initiate properly, you can get its task ID with `docker service ps <service-name>`. Running `docker inspect <task-id>` might give you some clues to what is happening. Use `docker stack rm synology-tls` to remove the docker stack entirely.
 
