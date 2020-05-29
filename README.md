@@ -101,21 +101,18 @@ mv sample.env .env
 
 The `.env` file specifies eight variables. Adjust them as needed:
 
-* **CRON_SCHEDULE** - Defines the schedule for automated renewal and deployment of the certificates. The job also updates the acme.sh script. [Crontab guru][crontab_guru] is an excellent help for defining cron schedules. The default value `0 2 * * *` validates the certificates at 2 am daily.
 
-* **DOMAIN** - Replace this with your domain name (e.g. `example.com`).
+| Variable              | Default       | Description |
+|-----------------------|---------------|-------------|
+| **CRON_SCHEDULE**     |`0 2 * * *`    |Defines the schedule for automated renewal and deployment of the certificates. The job also updates the acme.sh script. [Crontab guru][crontab_guru] is an excellent help for defining cron schedules. The default value `0 2 * * *` validates the certificates at 2 am daily.|
+| **DOMAIN**            |`example.com`  |Replace this with your domain name (e.g. `example.com`).|
+| **STAGE**             |`staging`      |Options are `staging` or `production`. Use `staging` for testing purposes to avoid hitting rate limits from Let's Encrypt.|
+| **FORCE_RENEW**       |`false`        |If `true`, forces renewal of the certificates regardless of whether they are still valid. The default value is `false`.|
+| **DEPLOY_HOOK**       |`synology_dsm` |The `acme.sh` script supports up to 20 different deployment hooks. Synology TLS defaults to `synology_dsm`. Refer to the [wiki][acmesh_deploy] to see the notes on supporting two-factor authentication for your Synology account.|
+| **SYNO_Certificate**  |               |Defines the description to be shown in DSM's `Control Panel ➡ Security ➡ Certificate`.|
+| **SYNO_Hostname**     |`localhost`    |Refers to the local network address of your Synology NAS. Replace this with the local IP address of your NAS. You can find the address in DSM at `Control Panel ➡ Info Center ➡ Network` under `LAN 1`.|
+| **SYNO_Port**         |`5000`         |Captures the HTTP port DSM is listening on, the default value is `5000`. You can find the current value in DSM under `Control Panel ➡ Network ➡ DSM Settings`.|
 
-* **STAGE** - Options are `staging` or `production`. Use `staging` for testing purposes to avoid hitting rate limits from Let's Encrypt.
-
-* **FORCE_RENEW** - If `true`, forces renewal of the certificates regardless of whether they are still valid. The default value is `false`.
-
-* **DEPLOY_HOOK** - The `acme.sh` script supports up to 20 different deployment hooks. Synology TLS defaults to `synology_dsm`. Refer to the [wiki][acmesh_deploy] to see the notes on supporting two-factor authentication for your Synology account.
-
-* **SYNO_Certificate** - Defines the description to be shown in DSM's `Control Panel ➡ Security ➡ Certificate`.
-
-* **SYNO_Hostname** - Refers to the local address of your Synology NAS. Replace this with the local IP address of your NAS. You can find the address in DSM at `Control Panel ➡ Info Center ➡ Network` under `LAN 1`.
-
-* **SYNO_Port** - Captures the HTTP port DSM is listening on, the default value is `5000`. You can find the current value in DSM under `Control Panel ➡ Network ➡ DSM Settings`.
 
 
 ### Step 4 - Run with Docker Compose
