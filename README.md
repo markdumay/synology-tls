@@ -19,6 +19,12 @@
     <a href="https://github.com/markdumay/synology-tls/pulls" alt="Pulls">
         <img src="https://img.shields.io/github/issues-pr-raw/markdumay/synology-tls.svg" />
     </a>
+    <a href="https://hub.docker.com/r/markdumay/synology-tls" alt="Docker Image Size">
+        <img src="https://img.shields.io/docker/image-size/markdumay/synology-tls.svg" />
+    </a>
+    <a href="https://hub.docker.com/repository/docker/markdumay/synology-tls/builds" alt="Docker Build">
+        <img src="https://img.shields.io/docker/cloud/build/markdumay/synology-tls.svg" />
+    </a>
     <a href="https://github.com/markdumay/synology-tls/blob/master/LICENSE" alt="License">
         <img src="https://img.shields.io/github/license/markdumay/synology-tls.svg" />
     </a>
