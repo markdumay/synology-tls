@@ -93,8 +93,8 @@ print_status () {
 detect_current_versions() {
     # Detect current DSM version
     DSM_VERSION=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^productversion' | cut -d'=' -f2 | sed "s/\"//g")
-    DSM_MAJOR_VERSION=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^majorversion' | cut -d'=' -f2)
-    DSM_BUILD=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^buildnumber' | cut -d'=' -f2)
+    DSM_MAJOR_VERSION=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^majorversion' | cut -d'=' -f2 | sed "s/\"//g")
+    DSM_BUILD=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^buildnumber' | cut -d'=' -f2 | sed "s/\"//g")
 
     # Detect current Docker version
     DOCKER_VERSION=$(docker -v | egrep -o "[0-9]*.[0-9]*.[0-9]*," | cut -d',' -f 1)
