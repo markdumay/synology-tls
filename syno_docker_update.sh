@@ -14,6 +14,10 @@
 #======================================================================================================================
 # Constants
 #======================================================================================================================
+RED='\033[0;31m' # Red color
+GREEN='\033[0;32m' # Green color
+NC='\033[0m' # No Color
+BOLD='\033[1m' #Bold color
 DSM_SUPPORTED_VERSION=6
 DOWNLOAD_DOCKER=https://download.docker.com/linux/static/stable/x86_64
 DOWNLOAD_GITHUB=https://github.com/docker/compose
@@ -41,9 +45,7 @@ DOCKER_BACKUP_FILENAME="$WORKING_DIR/docker_backup_$(date +%Y%m%d_%H%M%S).tgz"
 SKIP_DOCKER_UPDATE='false'
 SKIP_COMPOSE_UPDATE='false'
 FORCE='false'
-# TODO: TEMP setting for debugging
-# STAGE='false'
-STAGE='true'
+STAGE='false'
 COMMAND=''
 TARGET_DOCKER_VERSION=''
 TARGET_COMPOSE_VERSION=''
@@ -79,14 +81,14 @@ usage() {
 
 # Display error message and terminate with non-zero error
 terminate() {
-    echo "ERROR: $1"
+    echo -e "${RED}${BOLD}ERROR: $1${NC}"
     echo
     exit 1
 }
 
 # Prints current progress to the console
 print_status () {
-    echo "Step $((STEP++)) from $TOTAL_STEPS: $1"
+    echo -e "${BOLD}Step $((STEP++)) from $TOTAL_STEPS: $1${NC}"
 }
 
 # Detects current versions for DSM, Docker, and Docker Compose
@@ -97,10 +99,10 @@ detect_current_versions() {
     DSM_BUILD=$(cat /etc.defaults/VERSION 2> /dev/null | grep '^buildnumber' | cut -d'=' -f2 | sed "s/\"//g")
 
     # Detect current Docker version
-    DOCKER_VERSION=$(docker -v | egrep -o "[0-9]*.[0-9]*.[0-9]*," | cut -d',' -f 1)
+    DOCKER_VERSION=$(docker -v 2>/dev/null | egrep -o "[0-9]*.[0-9]*.[0-9]*," | cut -d',' -f 1)
 
     # Detect current Docker Compose version
-    COMPOSE_VERSION=$(docker-compose -v | egrep -o "[0-9]*.[0-9]*.[0-9]*," | cut -d',' -f 1)
+    COMPOSE_VERSION=$(docker-compose -v 2>/dev/null | egrep -o "[0-9]*.[0-9]*.[0-9]*," | cut -d',' -f 1)
 
     echo "Current DSM version: $(printf ${DSM_VERSION:-Unknown})"
     echo "Current Docker version: $(printf ${DOCKER_VERSION:-Unknown})"
@@ -131,7 +133,6 @@ validate_current_version() {
 # Detects downloaded Docker versions
 detect_available_downloads() {
     if [ -z "$TARGET_DOCKER_VERSION" ] ; then
-        echo "find $WORKING_DIR/ | cut -c 4- | egrep -o 'docker-[0-9]*.[0-9]*.[0-9]*(-ce)?.tgz'"
         DOWNLOADS=$(find "$WORKING_DIR/" -maxdepth 1 -type f | cut -c 4- | egrep -o 'docker-[0-9]*.[0-9]*.[0-9]*(-ce)?.tgz')
         LATEST_DOWNLOAD=$(echo "$DOWNLOADS" | sort -bt. -k1,1 -k2,2n -k3,3n -k4,4n -k5,5n | tail -1)
         TARGET_DOCKER_VERSION=$(echo "$LATEST_DOWNLOAD" | sed "s/docker-//g" | sed "s/.tgz//g")
@@ -254,6 +255,7 @@ define_target_version() {
 }
 
 define_target_download() {
+    
     detect_available_downloads
     echo "Target Docker version: $(printf ${TARGET_DOCKER_VERSION:-Unknown})"
     echo "Target Docker Compose version: Unknown"
@@ -265,20 +267,28 @@ define_target_download() {
 # Workflow Functions
 #======================================================================================================================
 
+# Prepare working environment
+execute_prepare() {
+    if [ "$WORKING_DIR" == '.' ] || [ "$WORKING_DIR" == './' ] || [ -z "$WORKING_DIR" ] ; then
+        WORKING_DIR="$PWD"
+    else
+        mkdir -p "$WORKING_DIR"
+    fi
+    execute_clean 'silent'
+}
+
 # Stop Docker service if running
 execute_stop_syno() {
     print_status "Stopping Docker service"
-    SYNO_STATUS=$(synoservicectl --status "$SYNO_DOCKER_SERV_NAME" | grep running -o)
-    if [ SYNO_STATUS == 'running' ] ; then
-        synoservicectl --stop $SYNO_DOCKER_SERV_NAME
-    fi
-}
 
-# Prepare working environment
-execute_prepare() {
-    print_status "Preparing working environment ($WORKING_DIR)"
-    mkdir -p "$WORKING_DIR"
-    execute_clean 'silent'
+    if [ "$STAGE" == 'false' ] ; then
+        SYNO_STATUS=$(synoservicectl --status "$SYNO_DOCKER_SERV_NAME" | grep running -o)
+        if [ "$SYNO_STATUS" == 'running' ] ; then
+            synoservicectl --stop $SYNO_DOCKER_SERV_NAME
+        fi
+    else
+        echo "Skipping Docker service control in STAGE mode"
+    fi
 }
 
 # Backup current Docker binaries
@@ -287,8 +297,7 @@ execute_backup() {
     BASEPATH=$(dirname "$DOCKER_BACKUP_FILENAME")
     FILENAME=$(basename "$DOCKER_BACKUP_FILENAME") 
     cd "$BASEPATH"
-    tar -czf "$FILENAME" -C "$SYNO_DOCKER_BIN_PATH" bin -C "$SYNO_DOCKER_JSON_PATH" "dockerd.json"
-    echo "tar -czf $FILENAME -C $SYNO_DOCKER_BIN_PATH bin -C $SYNO_DOCKER_JSON_PATH dockerd.json"
+    tar -czvf "$FILENAME" -C "$SYNO_DOCKER_BIN_PATH" bin -C "$SYNO_DOCKER_JSON_PATH" "dockerd.json"
     if [ ! -f "$DOCKER_BACKUP_FILENAME" ] ; then
         terminate "Backup issue"
     fi
@@ -299,8 +308,8 @@ execute_download_bin() {
     if [ "$SKIP_DOCKER_UPDATE" == 'false' ] ; then
         TARGET_DOCKER_BIN="docker-$TARGET_DOCKER_VERSION.tgz"
         print_status "Downloading target Docker binary ($DOWNLOAD_DOCKER/$TARGET_DOCKER_BIN)"
-        curl "$DOWNLOAD_DOCKER/$TARGET_DOCKER_BIN" -o "$WORKING_DIR/$TARGET_DOCKER_BIN"
-        if [ ! -f "$WORKING_DIR/$TARGET_DOCKER_BIN" ] ; then 
+        response=$(curl "$DOWNLOAD_DOCKER/$TARGET_DOCKER_BIN" --write-out %{http_code} -o "$WORKING_DIR/$TARGET_DOCKER_BIN")
+        if [ $response != 200 ] ; then 
             terminate "Binary could not be downloaded"
         fi
     fi
@@ -343,8 +352,8 @@ execute_download_compose() {
     if [ "$SKIP_COMPOSE_UPDATE" == 'false' ] ; then
         COMPOSE_BIN="$DOWNLOAD_GITHUB/releases/download/$TARGET_COMPOSE_VERSION/docker-compose-Linux-x86_64"
         print_status "Downloading target Docker Compose binary ($COMPOSE_BIN)"
-        curl -L "$COMPOSE_BIN" -o "$WORKING_DIR/docker-compose"
-        if [ ! -f "$WORKING_DIR/docker-compose" ] ; then 
+        response=$(curl -L "$COMPOSE_BIN" --write-out %{http_code} -o "$WORKING_DIR/docker-compose")
+        if [ $response != 200 ] ; then 
             terminate "Binary could not be downloaded"
         fi
     fi
@@ -353,15 +362,15 @@ execute_download_compose() {
 # Install binaries
 execute_install_bin() {
     print_status "Installing binaries"
-    if [ STAGE == 'false' ] ; then
-        echo "TODO: implement"
-        # TODO: implement
-        echo "mv $WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        echo "mv $WORKING_DIR/docker-compose $SYNO_DOCKER_BIN/docker-compose"
-        echo "chmod +x $SYNO_DOCKER_BIN/*"
-        #mv "$WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        #mv "$WORKING_DIR/docker-compose $SYNO_DOCKER_BIN/docker-compose"
-        #chmod +x "$SYNO_DOCKER_BIN/*"
+    if [ "$STAGE" == 'false' ] ; then
+
+        if [ "$SKIP_DOCKER_UPDATE" == 'false' ] ; then
+            cp "$WORKING_DIR"/docker/* "$SYNO_DOCKER_BIN"/
+        fi
+        if [ "$SKIP_COMPOSE_UPDATE" == 'false' ] ; then
+            cp "$WORKING_DIR"/docker-compose "$SYNO_DOCKER_BIN"/docker-compose
+        fi
+        chmod +x "$SYNO_DOCKER_BIN"/*
     else
         echo "Skipping installation in STAGE mode"
     fi
@@ -370,13 +379,9 @@ execute_install_bin() {
 # Restore binaries
 execute_restore_bin() {
     print_status "Restoring binaries"
-    if [ STAGE == 'false' ] ; then
-        echo "TODO: implement"
-        # TODO: implement
-        echo "mv $WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        echo "chmod +x $SYNO_DOCKER_BIN/*"
-        #mv "$WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        #chmod +x "$SYNO_DOCKER_BIN/*"
+    if [ "$STAGE" == 'false' ] ; then
+        cp "$WORKING_DIR"/docker/* "$SYNO_DOCKER_BIN"/
+        chmod +x "$SYNO_DOCKER_BIN"/*
     else
         echo "Skipping restoring in STAGE mode"
     fi
@@ -385,7 +390,7 @@ execute_restore_bin() {
 # Configure log driver
 execute_update_log() {
     print_status "Configuring log driver"
-    if [ STAGE == 'false' ] ; then
+    if [ "$STAGE" == 'false' ] ; then
         if [ ! -f "$SYNO_DOCKER_JSON" ] || grep "json-file" "$SYNO_DOCKER_JSON" -q ; then
             mkdir -p "$SYNO_DOCKER_DIR/etc/"
             printf "$SYNO_DOCKER_JSON_CONFIG" > "$SYNO_DOCKER_JSON"
@@ -398,10 +403,8 @@ execute_update_log() {
 # Restore log driver
 execute_restore_log() {
     print_status "Restoring log driver"
-    if [ STAGE == 'false' ] ; then
-        echo "TODO: implement"
-        echo "mv $WORKING_DIR/dockerd.json $SYNO_DOCKER_JSON"
-        #mv "$WORKING_DIR/docker/dockerd.json $SYNO_DOCKER_JSON"
+    if [ "$STAGE" == 'false' ] ; then
+        cp "$WORKING_DIR"/dockerd.json "$SYNO_DOCKER_JSON"
     else
         echo "Skipping restoring in STAGE mode"
     fi
@@ -410,15 +413,20 @@ execute_restore_log() {
 # Start Docker service
 execute_start_syno() {
     print_status "Starting Docker service"
-    synoservicectl --start "$SYNO_DOCKER_SERV_NAME"
 
-    SYNO_STATUS=$(synoservicectl --status "$SYNO_DOCKER_SERV_NAME" | grep running -o)
-    if [ SYNO_STATUS != 'running' ] ; then
-        if [ "$FORCE" != 'true' ] ; then
-            terminate "Could not bring Docker Engine back online"
-        else
-            echo "ERROR: Could not bring Docker Engine back online"
+    if [ "$STAGE" == 'false' ] ; then
+        synoservicectl --start "$SYNO_DOCKER_SERV_NAME"
+
+        SYNO_STATUS=$(synoservicectl --status "$SYNO_DOCKER_SERV_NAME" | grep running -o)
+        if [ "$SYNO_STATUS" != 'running' ] ; then
+            if [ "$FORCE" != 'true' ] ; then
+                terminate "Could not bring Docker Engine back online"
+            else
+                echo "ERROR: Could not bring Docker Engine back online"
+            fi
         fi
+    else
+        echo "Skipping Docker service control in STAGE mode"
     fi
 }
 
@@ -492,27 +500,27 @@ done
 # Execute workflows
 case "$COMMAND" in
     backup )
-        TOTAL_STEPS=4
+        TOTAL_STEPS=3
         detect_current_versions
-        execute_stop_syno
         execute_prepare
+        execute_stop_syno
         execute_backup
         execute_start_syno
         ;;
     download )
-        TOTAL_STEPS=3
+        TOTAL_STEPS=2
         detect_current_versions
-        define_target_version
         execute_prepare
+        define_target_version
         execute_download_bin
         execute_download_compose
         ;;
     install )
-        TOTAL_STEPS=7
+        TOTAL_STEPS=6
         detect_current_versions
+        execute_prepare
         define_target_download
         execute_stop_syno
-        execute_prepare
         execute_backup
         execute_extract_bin
         execute_install_bin
@@ -522,6 +530,7 @@ case "$COMMAND" in
     restore )
         TOTAL_STEPS=5
         detect_current_versions
+        execute_prepare
         define_restore
         execute_stop_syno
         execute_extract_backup
@@ -530,16 +539,16 @@ case "$COMMAND" in
         execute_start_syno
         ;;
     update )
-        TOTAL_STEPS=10
+        TOTAL_STEPS=9
         detect_current_versions
+        execute_prepare
         define_target_version
         define_update
-        execute_stop_syno
-        execute_prepare
-        execute_backup
         execute_download_bin
-        execute_extract_bin
         execute_download_compose
+        execute_stop_syno
+        execute_backup
+        execute_extract_bin
         execute_install_bin
         execute_update_log
         execute_start_syno
