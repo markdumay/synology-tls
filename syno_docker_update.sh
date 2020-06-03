@@ -239,9 +239,11 @@ define_update() {
 }
 
 define_restore() {
-    if [ BACKUP_FILENAME_FLAG != 'true' ]; then
+    if [ "$BACKUP_FILENAME_FLAG" != 'true' ]; then
         terminate "Please specify backup filename (--backup NAME)"
     fi
+
+    WORKING_DIR=$(dirname "$DOCKER_BACKUP_FILENAME")
 }
 
 define_target_version() {
@@ -274,7 +276,7 @@ execute_stop_syno() {
 
 # Prepare working environment
 execute_prepare() {
-    print_status "Preparing working environment ($WORKING_DIR/)"
+    print_status "Preparing working environment ($WORKING_DIR)"
     mkdir -p "$WORKING_DIR"
     execute_clean 'silent'
 }
@@ -286,6 +288,7 @@ execute_backup() {
     FILENAME=$(basename "$DOCKER_BACKUP_FILENAME") 
     cd "$BASEPATH"
     tar -czf "$FILENAME" -C "$SYNO_DOCKER_BIN_PATH" bin -C "$SYNO_DOCKER_JSON_PATH" "dockerd.json"
+    echo "tar -czf $FILENAME -C $SYNO_DOCKER_BIN_PATH bin -C $SYNO_DOCKER_JSON_PATH dockerd.json"
     if [ ! -f "$DOCKER_BACKUP_FILENAME" ] ; then
         terminate "Backup issue"
     fi
@@ -318,11 +321,16 @@ execute_extract_bin() {
 # Extract target Docker binary
 execute_extract_backup() {
     print_status "Extracting Docker backup ($WORKING_DIR/$DOCKER_BACKUP_FILENAME)"
-    tar -zxvf "$WORKING_DIR/$DOCKER_BACKUP_FILENAME" -C "$WORKING_DIR"
+    BASEPATH=$(dirname "$DOCKER_BACKUP_FILENAME")
+    FILENAME=$(basename "$DOCKER_BACKUP_FILENAME") 
+    cd "$BASEPATH"
+    tar -zxvf "$FILENAME"
+    mv bin docker
+
     if [ ! -d "$WORKING_DIR/docker" ] ; then 
         terminate "Docker binaries could not be extracted from archive"
     fi
-    if [ ! -f "$WORKING_DIR/docker-compose" ] ; then 
+    if [ ! -f "$WORKING_DIR/docker/docker-compose" ] ; then 
         terminate "Docker compose binary could not be extracted from archive"
     fi
     if [ ! -f "$WORKING_DIR/dockerd.json" ] ; then 
@@ -366,10 +374,8 @@ execute_restore_bin() {
         echo "TODO: implement"
         # TODO: implement
         echo "mv $WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        echo "mv $WORKING_DIR/docker-compose $SYNO_DOCKER_BIN/docker-compose"
         echo "chmod +x $SYNO_DOCKER_BIN/*"
         #mv "$WORKING_DIR/docker/* $SYNO_DOCKER_BIN/"
-        #mv "$WORKING_DIR/docker-compose $SYNO_DOCKER_BIN/docker-compose"
         #chmod +x "$SYNO_DOCKER_BIN/*"
     else
         echo "Skipping restoring in STAGE mode"
@@ -486,16 +492,18 @@ done
 # Execute workflows
 case "$COMMAND" in
     backup )
-        TOTAL_STEPS=3
+        TOTAL_STEPS=4
         detect_current_versions
         execute_stop_syno
+        execute_prepare
         execute_backup
         execute_start_syno
         ;;
     download )
-        TOTAL_STEPS=2
+        TOTAL_STEPS=3
         detect_current_versions
         define_target_version
+        execute_prepare
         execute_download_bin
         execute_download_compose
         ;;
@@ -543,11 +551,3 @@ case "$COMMAND" in
 esac
 
 echo "Done."
-
-
-# TODO: test
-# backup OK
-# download OK
-# install OK
-# restore ?? -> TODO: test archive structure
-# update OK
