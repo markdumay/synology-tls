@@ -16,6 +16,10 @@ secrets:
     SYNO_Password:
         file: secrets/SYNO_Password.txt
         # external: true
+    SLACK_WEBHOOK_URL:
+        file: secrets/SLACK_WEBHOOK_URL.txt
+        # external: true
+
 
 services:
     acme:
@@ -44,6 +48,7 @@ services:
             - CF_Token
             - SYNO_Username
             - SYNO_Password
+            - SLACK_WEBHOOK_URL
         environment:
             # Set to core domain in .env (e.g. example.com), wildcard is added automatically
             - DOMAIN=${DOMAIN}
