@@ -59,6 +59,8 @@ The project uses the following core software components:
 
 
 ## Prerequisites
+| :warning: At the time of writing, the latest Docker package released by Synology is 18.09.0-513. Unfortunately, this package contains a bug and does not expose environment variables to the Docker stack (Docker compose appears to be fixed). Update Docker on your Synology to the latest version using this [script][synology_docker] |
+| --- |
 Synology TLS can run on any Docker-capable host. The setup has been tested locally on macOS Catalina and a Synology NAS running DSM 6.2. Other prerequisites are:
 
 * **A registered domain name is required** - A domain name is required to configure SSL certificates that will enable secure traffic to your Synology NAS. You should have the ability to configure DNS entries for your domain too.
@@ -246,7 +248,7 @@ ID  NAME                MODE        REPLICAS    IMAGE                           
 
 You can view the service log with `docker service logs synology-tls_acme` once the service is up and running. Refer to the paragraph <a href="#step-4---run-with-docker-compose">Step 4 - Run with Docker Compose</a> for validation of the logs.
 
-Debugging swarm services can be quite challenging. If for some reason your service does not initiate properly, you can get its task ID with `docker service ps <service-name>`. Running `docker inspect <task-id>` might give you some clues to what is happening. Use `docker stack rm synology-tls` to remove the docker stack entirely.
+Debugging swarm services can be quite challenging. If for some reason your service does not initiate properly, you can get its task ID with `docker service ps synology-tls_acme`. Running `docker inspect <task-id>` might give you some clues to what is happening. Use `docker stack rm synology-tls` to remove the docker stack entirely.
 
 
 ## Usage
@@ -298,3 +300,4 @@ Copyright © [Mark Dumay][blog]
 -->
 [blog]: https://github.com/markdumay
 [repository]: https://github.com/markdumay/synology-tls.git
+[synology_docker]: https://github.com/markdumay/synology-docker.git
