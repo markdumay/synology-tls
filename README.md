@@ -59,8 +59,9 @@ The project uses the following core software components:
 
 
 ## Prerequisites
-| :warning: At the time of writing, the latest Docker package released by Synology is 18.09.0-513. Unfortunately, this package contains a bug and does not expose environment variables to the Docker stack (Docker compose appears to be fixed). Update Docker on your Synology to the latest version using this [script][synology_docker] |
+| :warning: At the time of writing, the latest Docker package released by Synology is 18.09.0-513. This package does not expose environment variables to Docker Swarm correctly. To solve the issue, update Docker on your Synology to the latest version using this [script][synology_docker]. |
 | --- |
+
 Synology TLS can run on any Docker-capable host. The setup has been tested locally on macOS Catalina and a Synology NAS running DSM 6.2. Other prerequisites are:
 
 * **A registered domain name is required** - A domain name is required to configure SSL certificates that will enable secure traffic to your Synology NAS. You should have the ability to configure DNS entries for your domain too.
