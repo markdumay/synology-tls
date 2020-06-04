@@ -1,4 +1,4 @@
-# Synology TLS (work in progress)
+# Synology TLS
 
 
 <!-- Tagline -->
