@@ -48,7 +48,7 @@ services:
             # Set to core domain in .env (e.g. example.com), wildcard is added automatically
             - DOMAIN=${DOMAIN}
             # Set to 'production' in .env to request real certificate, defaults to staging (appends '--test' parameter)
-            - STAGE=${STAGE}
+            - TARGET=${TARGET}
             # Set to 'true' in .env to force renew a cert immediately (appends '--force' parameter)
             - FORCE_RENEW=${FORCE_RENEW}
             # Deployment settings (using Synology hook)

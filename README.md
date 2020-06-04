@@ -59,8 +59,9 @@ The project uses the following core software components:
 
 
 ## Prerequisites
-| :warning: At the time of writing, the latest Docker package released by Synology is 18.09.0-513. Unfortunately, this package contains a bug and does not expose environment variables to the Docker stack (Docker compose appears to be fixed). Update Docker on your Synology to the latest version using this [script][synology_docker] |
+| :warning: At the time of writing, the latest Docker package released by Synology is 18.09.0-513. This package does not expose environment variables to Docker Swarm correctly. To solve the issue, update Docker on your Synology to the latest version using this [script][synology_docker]. |
 | --- |
+
 Synology TLS can run on any Docker-capable host. The setup has been tested locally on macOS Catalina and a Synology NAS running DSM 6.2. Other prerequisites are:
 
 * **A registered domain name is required** - A domain name is required to configure SSL certificates that will enable secure traffic to your Synology NAS. You should have the ability to configure DNS entries for your domain too.
@@ -108,7 +109,7 @@ The `.env` file specifies eight variables. Adjust them as needed:
 |-----------------------|---------------|-------------|
 | **CRON_SCHEDULE**     |`0 2 * * *`    |Defines the schedule for automated renewal and deployment of the certificates. The job also updates the acme.sh script. [Crontab guru][crontab_guru] is an excellent help for defining cron schedules. The default value `0 2 * * *` validates the certificates at 2 am daily.|
 | **DOMAIN**            |`example.com`  |Replace this with your domain name (e.g. `example.com`).|
-| **STAGE**             |`staging`      |Options are `staging` or `production`. Use `staging` for testing purposes to avoid hitting rate limits from Let's Encrypt.|
+| **TARGET**            |`staging`      |Options are `staging` or `production`. Use `staging` for testing purposes to avoid hitting rate limits from Let's Encrypt.|
 | **FORCE_RENEW**       |`false`        |If `true`, forces renewal of the certificates regardless of whether they are still valid. The default value is `false`.|
 | **DEPLOY_HOOK**       |`synology_dsm` |The `acme.sh` script supports up to 20 different deployment hooks. Synology TLS defaults to `synology_dsm`. Refer to the [wiki][acmesh_deploy] to see the notes on supporting two-factor authentication for your Synology account.|
 | **SYNO_Certificate**  |               |Defines the description to be shown in DSM's `Control Panel ➡ Security ➡ Certificate`.|
@@ -221,7 +222,7 @@ secrets:
 ```
 
 ### Step 3 - Update the Environment Variables
-*Unchanged, however, set STAGE to production once everything is working properly*
+*Unchanged, however, set TARGET to production once everything is working properly*
 
 
 ### Step 4 - Run Docker Service
