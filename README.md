@@ -3,7 +3,7 @@
 
 <!-- Tagline -->
 <p align="center">
-    <b>Automatically update Let's Encrypt wildcard certificates for Synology NAS</b>
+    <b>Automatically Update Let's Encrypt Wildcard Certificates for Synology NAS</b>
     <br />
 </p>
 
