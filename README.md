@@ -77,10 +77,10 @@ Synology TLS can run on any Docker-capable host. The setup has been tested local
 It is recommended to test the services locally before deploying them to your NAS. Running the service with `docker-compose` greatly simplifies validating everything is working as expected. Below four steps will allow you to run the services on your local machine and validate it is working correctly.
 
 ### Step 1 - Clone the Repository
-The first step is to clone the repository to a local folder. Assuming you are in the working folder of your choice, clone the repository files. Git automatically creates a new folder `synology-tls` and copies the files to this directory. Now change your working folder to be prepared for the next steps.
+The first step is to clone the repository to a local folder. Assuming you are in the working folder of your choice, clone the repository files. Git automatically creates a new folder `synology-tls` and copies the files to this directory. The option `--recurse-submodules` ensures the embedded submodules are fetched too. Now change your working folder to be prepared for the next steps.
 
 ```console
-git clone https://github.com/markdumay/synology-tls.git
+git clone --recurse-submodules https://github.com/markdumay/synology-tls.git
 cd synology-tls
 ```
 
@@ -198,7 +198,7 @@ printf admin | docker secret create SYNO_Username -
 printf password | docker secret create SYNO_Password -
 ```
 
-If you do not feel comfortable copying secrets from your command line, you can use the wrapper `create_secret.sh`. This script prompts for a secret and ensures sensitive data is not displayed in your console.
+If you do not feel comfortable copying secrets from your command line, you can use the wrapper `create_secret.sh`. This script prompts for a secret and ensures sensitive data is not displayed in your console. The script is available in the folder `/docker-secret` of your repository.
 
 ```console
 ./create_secret.sh CF_Email
