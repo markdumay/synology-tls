@@ -28,7 +28,7 @@ fi;
 # Generate a script to issue / renew certificates
 printf "%b" '#!'"/usr/bin/env sh\n \
 . /usr/local/bin/stage-env.sh
-acme.sh --issue -d '$DOMAIN' -d '*.$DOMAIN' --dns dns_cf $TEST_FLAG $RENEW_FLAG
+acme.sh --issue -d '$DOMAIN' -d '*.$DOMAIN' --dns dns_cf $TEST_FLAG $RENEW_FLAG --server letsencrypt
 " >/usr/local/bin/issue.sh && chmod +x /usr/local/bin/issue.sh
 
 # Generate a script to deploy certificates
