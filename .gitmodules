@@ -1,0 +1,3 @@
+[submodule "docker-secret"]
+	path = docker-secret
+	url = https://github.com/markdumay/docker-secret.git
